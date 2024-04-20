@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <h1>Product Table</h1>
+    <table border="2" cellspacing="5">
+        <thead>
+            <tr>
+                <th>S.No.</th>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Links</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% products.forEach(function(product, index) { %>
+                <tr>
+                    <td><%= index + 1 %></td>
+                    <td><%= product.name %></td>
+                    <td>$ <%= product.price %></td>
+                    <td>
+                        <a href="/view/<%= product._id %>"><button>
+                            View
+                        </button></a>
+                        <a href="/update/<%= product._id %>"><button>
+                            Update
+                        </button></a>
+                        <a href="/delete/<%= product._id %>"><button>
+                            Delete
+                        </button></a>
+                    </td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+</body>
+
+</html>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Product</title>
+    <link rel="stylesheet" href="./viewProduct.css">
+</head>
+<body>
+    <h1>Product Info</h1>
+    <% productInfo.forEach((ele) => { %>
+        <div>
+            <% if( ele._id === productId ){ %>
+                <h2>Name : <%= ele.name %></h2>
+                <h2>Price : <%= ele.price %></h2>
+            <% } %>
+        </div>
+    <% }) %>
+    <a href="/"><button>Go Back</button></a>
+</body>
+</html>
