@@ -11,32 +11,25 @@
 </head>
 
 <body>
+    <h2><%= message %></h2>
     <h1>Product Table</h1>
-    <table border="2" cellspacing="5">
+    <table border="2">
         <thead>
-            <tr>
-                <th>S.No.</th>
-                <th>Name</th>
-                <th>Price</th>
-                <th>Links</th>
-            </tr>
+            <th>S.No.</th>
+            <th>Product Name</th>
+            <th>Product Price</th>
+            <th>Links</th>
         </thead>
         <tbody>
-            <% products.forEach(function(product, index) { %>
+            <% data.forEach((ele, ind) => { %>
                 <tr>
-                    <td><%= index + 1 %></td>
-                    <td><%= product.name %></td>
-                    <td>$ <%= product.price %></td>
+                    <td> <%= ind + 1 %></td>
+                    <td> <%= ele.name %></td>
+                    <td> ₹<%= ele.price %></td>
                     <td>
-                        <a href="/view/<%= product._id %>"><button>
-                            View
-                        </button></a>
-                        <a href="/update/<%= product._id %>"><button>
-                            Update
-                        </button></a>
-                        <a href="/delete/<%= product._id %>"><button>
-                            Delete
-                        </button></a>
+                        <a href="/showproduct/<%=ele._id%>"><button>View</button></a>
+                        <a href="/editproduct/<%=ele._id%>"><button>Edit</button></a>
+                        <a href="/deleteproduct/<%=ele._id%>"><button>Delete</button></a>
                     </td>
                 </tr>
             <% }) %>

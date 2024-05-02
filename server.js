@@ -1,101 +1,102 @@
 const express = require("express");
-const fs = require("fs");
-const path = require("path");
 const app = express();
+const session = require("express-session");
+const mongodb = require("mongodb");
+
+const client = mongodb.MongoClient;
+
+let dbinstance;
+client.connect("mongodb+srv://anshul5010be22:ansh123@cluster0.luebml7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0").then((database) => {
+    console.log("connected");
+    dbinstance = database.db("table");
+})
+.catch((err) => {
+    console.log("Error occurred while connecting to database");
+})
 
 
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
-app.use(express.static(__dirname + "/views"));
-app.set("view engine", "ejs");
+app.set("view engine","ejs");
 
 
-const mongodb = require("mongodb");
-const client = mongodb.MongoClient;
-const object = mongodb.ObjectId;
-
-let dbinstance;
-
-client.connect("mongodb://127.0.0.1:27017").then((database) => {
-    console.log("connected")
-    dbinstance = database.db("table");
-}).catch((err) => {
-    console.log("Error occurred : ",err);
+app.get("/", (req, res) => {
+    dbinstance.collection("table_data").find({}).toArray().then((data) => {
+        console.log({success:true,message:"Data fetched from database to show on Home page"});
+        res.render("home",{message:"",data});
+    }).catch((err) => {
+        console.log({success:false, message:"Error in fetching data from database"});
+    })
 })
 
-
-
-app.get("/",async (req,res) => {
-    try{
-        const collection = dbinstance.collection("product_table");
-        const products = await collection.find({},{ projection: {
-            _id:1,
-            name:1,
-            price:1
-        }}).toArray();
-        res.render("home",{products})
-    }catch(error){
-        console.log("Error fetching data : ",error);
-        res.status(500).json("An error occurred while fetching data ");
-    }
+app.get("/addproduct/:name/:price", (req,res) => {
+    const { name, price } = req.params;
+    dbinstance.collection("table_data").insertOne({name,price}).then((data) => {
+        console.log({success:true,message:"One insertion successfull"});
+        res.send(data);
+    }).catch((err) => {
+        console.log({success:false, message:"Error in inserting in database",error : err.message});
+    })
 })
 
-app.get("/view/:productId", async (req, res) => {
-    try {
-        const collection = dbinstance.collection("product_table");
-        const productId = req.params.productId;
+app.get("/showproduct/:productid", (req,res) => {
+    const productid = req.params.productid;
+    dbinstance.collection("table_data").findOne({_id : new mongodb.ObjectId(productid)}).then((data) => {
+        console.log({success:true,message:"Product fetched Successfully"});
+        res.render("viewProduct",{data});
+    }).catch((err) => {
+        console.log({success:false,message:"Error in fetching the required product.."});
+    })
+})
 
-        const productInfo = await collection.find({}, {
-            projection: {
-                _id: 1,
-                name: 1,
-                price: 1
-            }
-        }).toArray();
-
-        res.render("viewProduct", { productInfo,productId });
-
-    } catch (err) {
-        console.error(`Error occurred while fetching the data: ${err}`);
-        // Respond with a 500 status code and an error message
-        res.status(500).json({
-            success: false,
-            message: "Error fetching data for view"
-        });
-    }
-});
-
-
-
-
-
-app.get("/update/:productId",async (req,res) => {
-    try{
-        const productId = req.params.productId; 
-        const collection = dbinstance.collection("product_table");
-        const productInfo = await collection.find({},{project:{
-            _id:1,
-            name:1,
-            price:1
-        }}).toArray();
-        res.render("updateProduct",{productInfo,productId})
-    }catch(err){
-        console.log(`Error occurred while fetching data : ${err}`);
-        return res.status(400).json({
-            success:false,
-            message:"Error fetching data for updation !!"
+app.get("/editproduct/:productid", (req, res) => {
+    const productid = req.params.productid;
+    dbinstance.collection("table_data").findOne({_id:new mongodb.ObjectId(productid)}).then((data) => {
+        if (data) {
+            console.log({success:true, message:"Product fetched successfully for updation"});
+            res.render("updateProduct",{data});
+        } else {
+            console.log({success:false, message:"Product not found"});
+            res.redirect("/");
+        }
+        }).catch((err) => {
+            console.log({success:false,message:"Error in fetching the required product.."});
+            res.redirect("/");
         })
-    }
 })
 
-// app.get("/delete/:productId",(req,res) => {
-//     const productId = req.params.productId;
-//     return res.status(200).json({
-//         success:true,
-//         productId
-//     })
-// })
+app.post("/editproduct/:productid", (req, res) => {
+    const productid = req.params.productid;
+    const { name, price } = req.body;
+    dbinstance.collection("table_data").updateOne({_id:new mongodb.ObjectId(productid)}, { $set:{ name, price }}).then((data) => {
+        if(data.modifiedCount === 1){
+            console.log({success:true,message:"Product updated successfully"});
+            res.redirect("/");
+        }else{
+            console.log({success:false,message:"Data not updated"});
+            res.redirect("/");
+        }
+    }).catch((err) => {
+        console.log({success:false,message:"Error in data updation.."});
+        res.redirect("/");
+    })
+})
 
-app.listen(3000, () => {
-    console.log(`Server is listening at https://localhost:3000`);
+app.get("/deleteproduct/:productid",(req, res) => {
+    const productid = req.params.productid;
+    dbinstance.collection("table_data").deleteOne({_id:new  mongodb.ObjectId(productid)}).then((data) => {
+        console.log({success:true,message:"Data deleted successfully"});
+        res.redirect("/");
+    }).catch((err) => {
+        console.log({success:false,message:"Error in deleting data"});
+        res.redirect("/");
+    })
+})
+
+app.listen(3000, (err) => {
+    if(err){
+        console.log("Error Occurred while starting the server..");
+    }else{
+        console.log("Server is listening at http://localhost:3000");
+    }
 })

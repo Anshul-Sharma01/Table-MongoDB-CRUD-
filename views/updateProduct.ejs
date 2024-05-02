@@ -7,6 +7,16 @@
 </head>
 <body>
     <h1>Update Product</h1>
-    <form action="/update"></form>
+    <form action="" method="POST">
+        <label for="pname">Product Name : </label>
+        <input type="text" id="pname" name="name" value="<%= data.name || '' %>">
+        <br>
+        <br>
+        <label for="price">Price : </label>
+        <input type="number" id="price" name="price" value="<%= data.price || 0 %>">
+        <br>
+        <br>
+        <button type="submit">Submit</button>
+    </form>
 </body>
 </html>
